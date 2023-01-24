@@ -1,6 +1,8 @@
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
+const generateRandomString = require("./generateRandomString");
+app.use(express.urlencoded({ extended: true }));
 
 app.set("view engine", "ejs")
 
@@ -30,9 +32,19 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
+});
+
 app.get("/urls/:id", (req, res) => {
   const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
-  // The website cannot find the page if I type urls/b2xVn2 - why is that?
   res.render("urls_show", templateVars);
 });
+
+app.post("/urls", (req, res) => {
+  console.log(req.body);
+  res.send("Ok");
+});
+
+
 
