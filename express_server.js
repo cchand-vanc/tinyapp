@@ -72,12 +72,14 @@ app.post("/urls/:id", (req, res) => {
   res.redirect("/urls");
 });
 
-//Gets cookie
-
-//Handles a POST to /login 
+//Log in  
 app.post('/login', (req, res) => {
   res.cookie("username", req.body.username);
   res.redirect("/urls");
 });
 
-
+//Log out
+app.post('/logout', (req, res) => {
+  res.clearCookie("username");
+  res.redirect("/urls")
+});
