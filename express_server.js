@@ -32,10 +32,12 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+//Page with website URL submission to be shortened
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
+ //Generates short URL then adds it to urlDatabase as key-value pair, along with its longURL
 app.post("/urls", (req, res) => {
   console.log(req.body);
   const shortURL = generateRandomString();
@@ -44,13 +46,21 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 });
 
-app.get("/urls/:id", (req, res) => {
+app.get("/urls/:id", (req, res) => { 
   const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
   res.render("urls_show", templateVars);
 });
 
-app.get("/u/:id", (req, res) => {
+//Fetches longURL from urlDatabase, and redirects user to that site
+app.get("/u/:id", (req, res) => { 
   const longURL = urlDatabase[req.params.id];
   res.redirect(longURL);
 });
+
+app.post("/urls/:id/delete", (req, res) => {
+  delete urlDatabase[req.params.id];
+  res.redirect("/urls");
+});
+
+
 
