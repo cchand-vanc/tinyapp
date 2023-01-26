@@ -10,7 +10,7 @@ function generateRandomString(length) {
 function getUserByEmail(email, users) {
   for (let user in users) {
     if (users[user].email === email){
-    return user;
+    return users[user];
     }  
   }
   return false;

@@ -19,18 +19,18 @@
       </div>
     </div>
     <% if(user && user.email){ %>
-    <a class="nav-item nav-link"><%= user.email %></a>
+    <a class="nav-item nav-link">Logged in as: <%= user.email %></a>
     <form method="POST" action="/logout"> 
       <td>
         <button type="submit">Log out</button>
       </td>
     </form>
       <% } else { %>  
-      <a class="loging" href="/login">
-        <button type="submit" style="margin:7px;">Click here to login</button>
+      <a class="login" href="/login">
+        <button type="submit" style="margin:7px;">Already have an account?</button>
       </a>
       <a class="register" href="/register">
-        <button type="submit">Click here to register</button>
+        <button type="submit">Create an account</button>
       </a>
      <% } %>
      </form>

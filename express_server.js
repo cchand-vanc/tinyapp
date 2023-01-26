@@ -1,11 +1,11 @@
 const express = require("express");
-const cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser');
 const app = express();
 const PORT = 8080; // default port 8080
 const { generateRandomString, getUserByEmail } = require("./tinyapp_functions");
 
 //Configuration for res.render
-app.set("view engine", "ejs")
+app.set("view engine", "ejs");
 
 //Middleware
 app.use(express.urlencoded({ extended: true }));//populates req.body
@@ -57,7 +57,7 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
- //Generates short URL then adds it to urlDatabase as key-value pair, along with its longURL
+//Generates short URL then adds it to urlDatabase as key-value pair, along with its longURL
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString(6);
   const longURL = req.body["longURL"];
@@ -66,14 +66,14 @@ app.post("/urls", (req, res) => {
 });
 
 
-app.get("/urls/:id", (req, res) => { 
+app.get("/urls/:id", (req, res) => {
   const user_id = req.cookies.user_id;
   const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], user: users[user_id] };
   res.render("urls_show", templateVars);
 });
 
 //Fetches longURL from urlDatabase, and redirects user to that site
-app.get("/u/:id", (req, res) => { 
+app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id];
   res.redirect(longURL);
 });
@@ -86,16 +86,28 @@ app.post("/urls/:id/delete", (req, res) => {
 
 //Updates the short URL with a new website link
 app.post("/urls/:id", (req, res) => {
-  urlDatabase[req.params.id] = req.body.longURL
+  urlDatabase[req.params.id] = req.body.longURL;
   res.redirect("/urls");
 });
 
-//Set login cookie 
+//GET login
+app.get("/login", (req, res) => {
+  res.render("login");
+});
+
+//POST login
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const result = getUserByEmail(email, users);
-  const user_id = result.id;
+  const foundUser = getUserByEmail(email, users);
+  const user_id = foundUser.id;
+  
+  if (!foundUser) {
+    return res.status(403).send("Could not find user with that email");
+  }
+  else if (password !== foundUser.password) {
+    return res.status(403).send("Password does not match");
+  }
   res.cookie("user_id", user_id);
   res.redirect("/urls");
 });
@@ -103,7 +115,7 @@ app.post("/login", (req, res) => {
 //Clear cookie on log out
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
-  res.redirect("/urls")
+  res.redirect("/login");
 });
 
 //GET registration
@@ -116,14 +128,14 @@ app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
 
-  //If email or password field is empty 
+  //If email or password field is empty
   if (!email || !password) {
-    res.status(400).send("Please input a username and password")
+    res.status(400).send("Please input an email and password");
   }
 
-  const result = getUserByEmail(email, users);
-
-  if (!result) {
+  //Adding user if they dont exist
+  const foundUser = getUserByEmail(email, users);
+  if (!foundUser) {
     const user_id = generateRandomString(3);
     users[user_id] = {
       id: user_id,
@@ -135,11 +147,4 @@ app.post("/register", (req, res) => {
   } else {
     return res.status(400).send('Email address is already in use');
   }
-
-
-});
-
-//GET login
-app.get("/login", (req, res) => {
-  res.render("login");
 });
