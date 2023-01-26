@@ -1,7 +1,7 @@
-function generateRandomString() {
+function generateRandomString(length) {
   let randomString = "";
   const potentialChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890abcdefghijklmnopqrstuvwxyz";
-  for (let i = 0; i < 6; i ++) {
+  for (let i = 0; i < length; i ++) {
     randomString += potentialChars.charAt(Math.random() * potentialChars.length);
   }
   return randomString;
