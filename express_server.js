@@ -54,7 +54,9 @@ app.get("/urls", (req, res) => {
 
 //Page with website URL submission to be shortened
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const user_id = req.cookies.user_id;
+  const templateVars = { user: users[user_id] };
+  res.render("urls_new", templateVars);
 });
 
 //Generates short URL then adds it to urlDatabase as key-value pair, along with its longURL
@@ -92,7 +94,12 @@ app.post("/urls/:id", (req, res) => {
 
 //GET login
 app.get("/login", (req, res) => {
-  res.render("login");
+  if (req.cookies.user_id){
+    res.redirect("/urls")
+  } 
+  else {
+    res.render("login");
+ }
 });
 
 //POST login
@@ -120,7 +127,12 @@ app.post("/logout", (req, res) => {
 
 //GET registration
 app.get("/register", (req, res) => {
-  res.render("register");
+  if (req.cookies.user_id){
+    res.redirect("/urls")
+  } 
+  else {
+    res.render("register");
+ }
 });
 
 //POST registration
