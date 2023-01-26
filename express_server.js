@@ -92,7 +92,11 @@ app.post("/urls/:id", (req, res) => {
 
 //Set login cookie 
 app.post("/login", (req, res) => {
-  res.cookie("user_id", users[user_id].id);
+  const email = req.body.email;
+  const password = req.body.password;
+  const result = getUserByEmail(email, users);
+  const user_id = result.id;
+  res.cookie("user_id", user_id);
   res.redirect("/urls");
 });
 
@@ -104,30 +108,38 @@ app.post("/logout", (req, res) => {
 
 //GET registration
 app.get("/register", (req, res) => {
-  res.render("urls_register");
+  res.render("register");
 });
 
 //POST registration
 app.post("/register", (req, res) => {
-  let user_id = generateRandomString(3);
-  let email = req.body.email;
-  let password = req.body.password;
-
-  users[user_id] = { 
-    id: user_id, 
-    email,
-    password
-  };
+  const email = req.body.email;
+  const password = req.body.password;
 
   //If email or password field is empty 
   if (!email || !password) {
     res.status(400).send("Please input a username and password")
   }
 
-//Finding the user
- getUserByEmail(email);
+  const result = getUserByEmail(email, users);
 
-  
-  res.cookie("user_id", users[user_id].id);
-  res.redirect("/urls");
+  if (!result) {
+    const user_id = generateRandomString(3);
+    users[user_id] = {
+      id: user_id,
+      email,
+      password
+    };
+    res.cookie("user_id", user_id);
+    res.redirect("/urls");
+  } else {
+    return res.status(400).send('Email address is already in use');
+  }
+
+
+});
+
+//GET login
+app.get("/login", (req, res) => {
+  res.render("login");
 });

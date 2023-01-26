@@ -18,7 +18,7 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
     </div>
-    <% if(user){ %>
+    <% if(user && user.email){ %>
     <a class="nav-item nav-link"><%= user.email %></a>
     <form method="POST" action="/logout"> 
       <td>
@@ -26,11 +26,12 @@
       </td>
     </form>
       <% } else { %>  
-    <form method="POST" action="/login"> 
-      <td>
-        <input type="text" id="login" name="username">
-        <button type="submit">Log in</button>
-      </td>
+      <a class="loging" href="/login">
+        <button type="submit" style="margin:7px;">Click here to login</button>
+      </a>
+      <a class="register" href="/register">
+        <button type="submit">Click here to register</button>
+      </a>
      <% } %>
      </form>
   </nav>

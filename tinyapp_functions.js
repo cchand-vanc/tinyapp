@@ -7,12 +7,13 @@ function generateRandomString(length) {
   return randomString;
 };
 
-function getUserByEmail(email) {
+function getUserByEmail(email, users) {
   for (let user in users) {
-    if (users[user].email === email && users[user].password !== password) {
-      return res.status(400).send('Email address is already in use');
-    }
+    if (users[user].email === email){
+    return user;
+    }  
   }
+  return false;
 };
 
 
