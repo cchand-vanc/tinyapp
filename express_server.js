@@ -2,7 +2,7 @@ const express = require("express");
 const cookieParser = require('cookie-parser')
 const app = express();
 const PORT = 8080; // default port 8080
-const { generateRandomString } = require("./generateRandomString");
+const { generateRandomString, getUserByEmail } = require("./tinyapp_functions");
 
 //Configuration for res.render
 app.set("view engine", "ejs")
@@ -110,11 +110,24 @@ app.get("/register", (req, res) => {
 //POST registration
 app.post("/register", (req, res) => {
   let user_id = generateRandomString(3);
+  let email = req.body.email;
+  let password = req.body.password;
+
   users[user_id] = { 
     id: user_id, 
-    email: req.body.email,
-    password: req.body.password
+    email,
+    password
+  };
+
+  //If email or password field is empty 
+  if (!email || !password) {
+    res.status(400).send("Please input a username and password")
   }
+
+//Finding the user
+ getUserByEmail(email);
+
+  
   res.cookie("user_id", users[user_id].id);
   res.redirect("/urls");
 });
