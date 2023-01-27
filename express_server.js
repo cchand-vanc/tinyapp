@@ -16,16 +16,7 @@ app.use(cookieSession({
   })); 
 
 //Storage variables
-const urlDatabase = {
-  b2xVn2: {
-    longURL: "http://www.lighthouselabs.ca",
-    user_id: "b@b"
-  },
-  i3BoGr: {
-    longURL: "http://www.google.com",
-    user_id: "c@c",
-  },
-};
+const urlDatabase = {};
 
 const users = {
   userRandomID: {
@@ -79,7 +70,7 @@ app.post("/urls", (req, res) => {
     res.redirect(`/urls/${shortURL}`)
 });
 
-//Page with website URL submission to be shortened
+//Short URL creation page
 app.get("/urls/new", (req, res) => {
   const user_id = req.session.user_id;
   if (user_id) {
@@ -90,6 +81,7 @@ app.get("/urls/new", (req, res) => {
   }
 });
 
+//Short URL creation page
 app.get("/urls/:id", (req, res) => {
   const user_id = req.session.user_id;
   
@@ -99,14 +91,13 @@ app.get("/urls/:id", (req, res) => {
 
   const foundURLs = urlsForUser(user_id, urlDatabase);
   if (!foundURLs) {
-    return res.status(401).send("You do not own any these URLs - time to go make your own!");
+    return res.status(401).send("You do not own this URL - time to go make your own!");
   }
 
   const shortURL = req.params.id;
   const templateVars = { id: req.params.id, longURL: urlDatabase[shortURL].longURL, user: users[user_id] };
 
   res.render("urls_show", templateVars);
-
 });
 
 //Updates the short URL with a new website link
@@ -124,28 +115,28 @@ app.post("/urls/:id", (req, res) => {
 app.get("/u/:id", (req, res) => {
   let shortURL = req.params.id;
   if (!urlDatabase[shortURL]) {
-    res.status(400).send("This Short URL does not exist yet. Please go to 'Create New URL' and submit your long URL for shortening!")
-  } else {
-    const longURL = urlDatabase[shortURL].longURL;
-    res.redirect(longURL);
-  }
+    return res.status(400).send("This Short URL does not exist yet. Please go to 'Create New URL' and submit your long URL for shortening!")
+  } 
+
+  const longURL = urlDatabase[shortURL].longURL;
+  res.redirect(longURL);
 });
 
-//Deletes URL entry in our table
+/////////Delete URL Entry 
 app.post("/urls/:id/delete", (req, res) => {
-  // make sure they're logged in
+  // Are they logged in
   const user_id = req.session.user_id;
   if (!user_id) {
     return res.status(403).send("You are not logged in!")
   }
 
-  // make sure the URL is urlDatabase
+  // Is URL in urlDatabase
   const urlObject = urlDatabase[req.params.id]
   if (!urlObject) {
     return res.status(404).send("This URL does not exist!")
   }
 
-  // make sure the URL belongs to current user (compare URLObject.user_id with cookie)
+  // Does URL belong to current user 
   const urlBelongsToCurrentUser = urlObject.user_id === user_id;
   if (!urlBelongsToCurrentUser) {
     return res.status(403).send("This URL does not belong to this user!")
@@ -156,44 +147,7 @@ app.post("/urls/:id/delete", (req, res) => {
 
 });
 
-
-//GET login
-app.get("/login", (req, res) => {
-  const userExists  = req.session.user_id;
-  if (!userExists) {
-    return res.render("login");
-  }
-  res.redirect("/urls")
-});
-
-//POST login
-app.post("/login", (req, res) => {
-  const email = req.body.email;
-  const password = req.body.password;
-  const hashedPassword = bcrypt.hashSync(password, 10);
-    
-  //Does the user exist already?
-  const foundUser = getUserByEmail(email, users);
-  if (!foundUser) { 
-    return res.status(403).send("Could not find user with that email");
-  } 
-  //Do the passwords match?
-  const passwordMatch = bcrypt.compareSync(password, hashedPassword)
-     if (!passwordMatch) {
-        return res.status(403).send("Password does not match");
-      } 
-        const user_id = foundUser.id;
-        req.session.user_id = users[user_id].id;
-        res.redirect("/urls");
-});
-
-//Clear cookie on log out
-app.post("/logout", (req, res) => {
-//Enter clear cookie code here
-  res.redirect("/login");
-});
-
-//GET registration
+/////////GET registration
 app.get("/register", (req, res) => {
   const userExists = req.session.user_id
   if (!userExists) {
@@ -202,7 +156,7 @@ app.get("/register", (req, res) => {
   return res.redirect("/urls")
 });
 
-//POST registration
+/////////POST registration
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -231,3 +185,40 @@ app.post("/register", (req, res) => {
     return res.status(400).send('Email address is already in use');
   }
 });
+
+/////////GET login
+app.get("/login", (req, res) => {
+  const userExists  = req.session.user_id;
+  if (!userExists) {
+    return res.render("login");
+  }
+  res.redirect("/urls")
+});
+
+/////////POST login
+app.post("/login", (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, 10);
+    
+  //Does the user exist already?
+  const foundUser = getUserByEmail(email, users);
+  if (!foundUser) { 
+    return res.status(403).send("Cannot not find user with that email. Please go to /register to make an account");
+  } 
+  //Do the passwords match?
+  const passwordMatch = bcrypt.compareSync(password, hashedPassword)
+     if (!passwordMatch) {
+        return res.status(403).send("Password does not match");
+      } 
+        const user_id = foundUser.id;
+        req.session.user_id = users[user_id].id;
+        res.redirect("/urls");
+});
+
+/////////POST Logout
+app.post("/logout", (req, res) => {
+  req.session = null;
+  res.redirect("/login");
+});
+

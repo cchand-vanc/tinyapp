@@ -17,16 +17,18 @@ function getUserByEmail(email, users) {
 };
 
 function urlsForUser(id, urlDatabase) {
-  const foundURLs = [];
+  const foundURLs = {};
   for (let url in urlDatabase) {
-    const urlEntry = urlDatabase[url]
+    const urlEntry = urlDatabase[url];
     if (urlEntry.user_id === id) {
-      foundURLs.push(urlEntry.longURL);
+      foundURLs[url] = urlDatabase[url].longURL;
     }
   }
+  console.log('urlDatabase:' , urlDatabase);
   if (foundURLs.length < 1) {
     return null;
   } else {
+    console.log('foundURLs: ', foundURLs)
     return foundURLs;
   }
 };
