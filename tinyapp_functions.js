@@ -20,7 +20,7 @@ function urlsForUser(id, urlDatabase) {
   const foundURLs = {};
   for (let url in urlDatabase) {
     const urlEntry = urlDatabase[url];
-    if (urlEntry.user_id === id) {
+    if (urlEntry.userId === id) {
       foundURLs[url] = urlDatabase[url].longURL;
     }
   }
