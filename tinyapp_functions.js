@@ -24,11 +24,9 @@ function urlsForUser(id, urlDatabase) {
       foundURLs[url] = urlDatabase[url].longURL;
     }
   }
-  console.log('urlDatabase:' , urlDatabase);
   if (foundURLs.length < 1) {
     return null;
   } else {
-    console.log('foundURLs: ', foundURLs)
     return foundURLs;
   }
 };

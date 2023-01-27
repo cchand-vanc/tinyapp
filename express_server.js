@@ -47,12 +47,88 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
+//GET registration
+app.get("/register", (req, res) => {
+  const userExists = req.session.user_id
+  if (!userExists) {
+  return res.render("register");
+  }
+  return res.redirect("/urls")
+});
+
+//POST registration
+app.post("/register", (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, 10);
+
+  //If email or password field is empty
+  if (!email || !password) {
+    return res.status(400).send("Please input an email and password");
+  }
+
+  //Adding user if they dont exist
+  const foundUser = getUserByEmail(email, users);
+  
+  if (!foundUser) {
+    const user_id = generateRandomString(3);
+    users[user_id] = {
+      id: user_id,
+      email,
+      password: hashedPassword
+    };
+    
+    req.session.user_id = users[user_id].id;
+    res.redirect("/urls");
+  } else {
+    return res.status(400).send('Email address is already in use');
+  }
+});
+
+//GET login
+app.get("/login", (req, res) => {
+  const userExists  = req.session.user_id;
+  if (!userExists) {
+    return res.render("login");
+  }
+  res.redirect("/urls")
+});
+
+//POST login
+app.post("/login", (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, 10);
+    
+  //Does the user exist already?
+  const foundUser = getUserByEmail(email, users);
+  if (!foundUser) { 
+    return res.status(403).send("Cannot not find user with that email. Please go to /register to make an account");
+  } 
+  //Do the passwords match?
+  const passwordMatch = bcrypt.compareSync(password, hashedPassword)
+     if (!passwordMatch) {
+        return res.status(403).send("Password does not match");
+      } 
+        const user_id = foundUser.id;
+        req.session.user_id = users[user_id].id;
+        res.redirect("/urls");
+});
+
+//POST Logout
+app.post("/logout", (req, res) => {
+  req.session = null;
+  res.redirect("/login");
+});
+
+//Renders /urls
 app.get("/urls", (req, res) => {
   const user_id = req.session.user_id;
   if (!user_id) {
     return res.status(401).send("Please log in to access this page")
   } 
-    const templateVars = { urls: urlDatabase, user: users[user_id] };
+  const foundURLs = urlsForUser(user_id, urlDatabase);
+    const templateVars = { urls: foundURLs, user: users[user_id] };
     res.render("urls_index", templateVars);
   
 });
@@ -88,13 +164,16 @@ app.get("/urls/:id", (req, res) => {
   if (!user_id) {
     return res.status(401).send("Please log in to access this page!")
   }
+  const shortURL = req.params.id;
+  if (!urlDatabase[shortURL]) {
+    return res.status(400).send("This Short URL does not exist yet. Please go to 'Create New URL' and submit your long URL for shortening!")
+  } 
 
   const foundURLs = urlsForUser(user_id, urlDatabase);
   if (!foundURLs) {
     return res.status(401).send("You do not own this URL - time to go make your own!");
   }
 
-  const shortURL = req.params.id;
   const templateVars = { id: req.params.id, longURL: urlDatabase[shortURL].longURL, user: users[user_id] };
 
   res.render("urls_show", templateVars);
@@ -104,7 +183,6 @@ app.get("/urls/:id", (req, res) => {
 app.post("/urls/:id", (req, res) => {
   const foundURLs = urlsForUser(req.params.id, urlDatabase);
   if (!foundURLs){
-    console.log(urlDatabase)
     return res.status(401).send("You are not permitted to access this URL!")
   } 
   urlDatabase[req.params.id].longURL = req.body.longURL;
@@ -113,7 +191,7 @@ app.post("/urls/:id", (req, res) => {
 
 //Fetches longURL from urlDatabase, and redirects user to that site
 app.get("/u/:id", (req, res) => {
-  let shortURL = req.params.id;
+  const shortURL = req.params.id;
   if (!urlDatabase[shortURL]) {
     return res.status(400).send("This Short URL does not exist yet. Please go to 'Create New URL' and submit your long URL for shortening!")
   } 
@@ -122,7 +200,7 @@ app.get("/u/:id", (req, res) => {
   res.redirect(longURL);
 });
 
-/////////Delete URL Entry 
+//Delete URL Entry 
 app.post("/urls/:id/delete", (req, res) => {
   // Are they logged in
   const user_id = req.session.user_id;
@@ -147,78 +225,4 @@ app.post("/urls/:id/delete", (req, res) => {
 
 });
 
-/////////GET registration
-app.get("/register", (req, res) => {
-  const userExists = req.session.user_id
-  if (!userExists) {
-  return res.render("register");
-  }
-  return res.redirect("/urls")
-});
-
-/////////POST registration
-app.post("/register", (req, res) => {
-  const email = req.body.email;
-  const password = req.body.password;
-  const hashedPassword = bcrypt.hashSync(password, 10);
-
-  //If email or password field is empty
-  if (!email || !password) {
-    return res.status(400).send("Please input an email and password");
-  }
-
-  //Adding user if they dont exist
-  const foundUser = getUserByEmail(email, users);
-  
-  if (!foundUser) {
-    const user_id = generateRandomString(3);
-    users[user_id] = {
-      id: user_id,
-      email,
-      password: hashedPassword
-    };
-    
-    req.session.user_id = users[user_id].id;
-    console.log(req.session.user_id);
-    res.redirect("/urls");
-  } else {
-    return res.status(400).send('Email address is already in use');
-  }
-});
-
-/////////GET login
-app.get("/login", (req, res) => {
-  const userExists  = req.session.user_id;
-  if (!userExists) {
-    return res.render("login");
-  }
-  res.redirect("/urls")
-});
-
-/////////POST login
-app.post("/login", (req, res) => {
-  const email = req.body.email;
-  const password = req.body.password;
-  const hashedPassword = bcrypt.hashSync(password, 10);
-    
-  //Does the user exist already?
-  const foundUser = getUserByEmail(email, users);
-  if (!foundUser) { 
-    return res.status(403).send("Cannot not find user with that email. Please go to /register to make an account");
-  } 
-  //Do the passwords match?
-  const passwordMatch = bcrypt.compareSync(password, hashedPassword)
-     if (!passwordMatch) {
-        return res.status(403).send("Password does not match");
-      } 
-        const user_id = foundUser.id;
-        req.session.user_id = users[user_id].id;
-        res.redirect("/urls");
-});
-
-/////////POST Logout
-app.post("/logout", (req, res) => {
-  req.session = null;
-  res.redirect("/login");
-});
 
