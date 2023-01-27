@@ -23,7 +23,7 @@ function urlsForUser(id, urlDatabase) {
       foundURLs.push(urlDatabase[url].longURL);
     }
   }
-  if (foundURLs.length < 1){
+  if (foundURLs.length < 1) {
     return null;
   } else {
     return foundURLs;
@@ -39,9 +39,11 @@ const urlDatabase = {
     longURL: "http://www.google.com",
     user_id: "c@c",
   },
+  abcdef: {
+    longURL: "http://www.bbc.co.uk",
+    user_id: "c@c",
+  },
 };
-
-urlsForUser("c@c", urlDatabase)
 
 
 module.exports = { generateRandomString, getUserByEmail, urlsForUser };
