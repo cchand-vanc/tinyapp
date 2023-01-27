@@ -19,8 +19,9 @@ function getUserByEmail(email, users) {
 function urlsForUser(id, urlDatabase) {
   const foundURLs = [];
   for (let url in urlDatabase) {
-    if (urlDatabase[url].user_id === id) {
-      foundURLs.push(urlDatabase[url].longURL);
+    const urlEntry = urlDatabase[url]
+    if (urlEntry.user_id === id) {
+      foundURLs.push(urlEntry.longURL);
     }
   }
   if (foundURLs.length < 1) {
@@ -30,20 +31,6 @@ function urlsForUser(id, urlDatabase) {
   }
 };
 
-const urlDatabase = {
-  b2xVn2: {
-    longURL: "http://www.lighthouselabs.ca",
-    user_id: "b@b"
-  },
-  i3BoGr: {
-    longURL: "http://www.google.com",
-    user_id: "c@c",
-  },
-  abcdef: {
-    longURL: "http://www.bbc.co.uk",
-    user_id: "c@c",
-  },
-};
 
 
 module.exports = { generateRandomString, getUserByEmail, urlsForUser };
