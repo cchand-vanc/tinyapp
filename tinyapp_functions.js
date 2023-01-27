@@ -16,5 +16,20 @@ function getUserByEmail(email, users) {
   return null;
 };
 
+function urlsForUser(id, urlDatabase) {
+  const foundURLs = [];
+  for (let url in urlDatabase) {
+    if (urlDatabase[url].user_id === id) {
+      foundURLs.push(urlDatabase[url].longURL);
+    }
+  }
+  if (foundURLs.length < 1){
+    return null;
+  } else {
+    return foundURLs;
+  }
+};
 
-module.exports = { generateRandomString, getUserByEmail };
+
+
+module.exports = { generateRandomString, getUserByEmail, urlsForUser };

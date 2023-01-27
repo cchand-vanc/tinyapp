@@ -34,7 +34,7 @@
           <% for (let id in urls) { %>
             <tr>
               <td><%= id %></td>
-              <td><%= urls[id] %></td>
+              <td><%= urls[id].longURL %></td>
               <form method="POST" action="/urls/<%= id %>"> 
                <td>
                  <input type="text" id="editURL" name="longURL">
