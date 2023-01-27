@@ -155,10 +155,10 @@ app.post("/login", (req, res) => {
   const foundUser = getUserByEmail(email, users);
 
   if (!foundUser) {
-    return res.status(403).send("Could not find user with that email");
+    res.status(403).send("Could not find user with that email");
   }
   else if (password !== foundUser.password) {
-    return res.status(403).send("Password does not match");
+    res.status(403).send("Password does not match");
   }
 
   const user_id = foundUser.id;

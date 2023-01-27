@@ -30,6 +30,18 @@ function urlsForUser(id, urlDatabase) {
   }
 };
 
+const urlDatabase = {
+  b2xVn2: {
+    longURL: "http://www.lighthouselabs.ca",
+    user_id: "b@b"
+  },
+  i3BoGr: {
+    longURL: "http://www.google.com",
+    user_id: "c@c",
+  },
+};
+
+urlsForUser("c@c", urlDatabase)
 
 
 module.exports = { generateRandomString, getUserByEmail, urlsForUser };
