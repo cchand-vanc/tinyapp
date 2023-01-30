@@ -35,19 +35,18 @@
             <tr>
               <td><%= id %></td>
               <td><%= urls[id] %></td>
-              <form method="POST" action="/urls/<%= id %>"> 
-               <td>
-                 <input type="text" id="editURL" name="longURL">
+              <td>
+                 <form method="GET" action="/urls/<%= id %>"> 
                  <button type="submit">Edit URL
                  </button>
+                </form>
                </td>
-              </form>
+               <td>
               <form method="POST" action="/urls/<%= id %>/delete">
-              <td>
                 <button type="submit">Delete
                 </button>
+              </form>
               </td>
-             </form>
             </tr>
             <% } %>
           </tbody>
