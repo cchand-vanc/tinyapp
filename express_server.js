@@ -3,7 +3,9 @@ const cookieSession = require('cookie-session');
 const bcrypt = require("bcryptjs");
 const app = express();
 const PORT = 8080; // default port 8080
+
 const { generateRandomString, getUserByEmail, urlsForUser } = require("./tinyapp_functions");
+const {urlDatabase, users} = require("./database");
 
 //Configuration for res.render
 app.set("view engine", "ejs");
@@ -15,28 +17,16 @@ app.use(cookieSession({
   keys: ["aazfcvt54567ujnHYduk6", "bbp234lkjn23i7cmserp2"],
 }));
 
-//Storage variables
-const urlDatabase = {};
-
-const users = {
-  userRandomID: {
-    id: "userRandomID",
-    email: "b@b",
-    password: "n",
-  },
-  user2RandomID: {
-    id: "user2RandomID",
-    email: "c@c",
-    password: "v",
-  },
-};
-
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  const userExists = req.session.userId;
+  if (!userExists) {
+    return res.render("login");
+  }
+  res.redirect("/urls");
 });
 
 app.get("/urls.json", (req, res) => {
@@ -139,6 +129,10 @@ app.post("/urls", (req, res) => {
   const longURL = req.body["longURL"];
   const userId = req.session.userId;
 
+  if (longURL.length === 0) {
+    return res.status(401).send("Please enter a URL to be shortened!");
+  }
+
   if (!userId) {
     return res.status(401).send("Please log in to access this page!");
   }
@@ -181,10 +175,18 @@ app.get("/urls/:id", (req, res) => {
 
 //Updates the short URL with a new website link
 app.post("/urls/:id", (req, res) => {
-  const foundURLs = urlsForUser(req.params.id, urlDatabase);
+  const userId = req.session.userId;
+  const foundURLs = urlsForUser(userId, urlDatabase);
+  
   if (!foundURLs) {
     return res.status(401).send("You are not permitted to access this URL!");
   }
+  
+  const newURL = req.body.longURL;
+  if (newURL.length === 0) {
+    return res.status(401).send("In order to update the TinyURL, you must enter a new URL and click 'Edit URL'");
+  }
+ 
   urlDatabase[req.params.id].longURL = req.body.longURL;
   res.redirect("/urls");
 });
